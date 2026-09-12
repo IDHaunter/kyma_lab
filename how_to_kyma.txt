@@ -1,0 +1,15 @@
+1. install docker desktop, check cli
+
+    docker --version
+    kubectl version --client
+    kubectl config get-contexts
+
+2. create kubernetes cluster in docker desktop, check nodes and pods in terminal
+
+    kubectl config get-contexts
+    kubectl get nodes
+    kubectl get pods -A
+
+3. create any app (py_test)
+
+4. create a docker image with your app
