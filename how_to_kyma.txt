@@ -13,3 +13,11 @@
 3. create any app (py_test)
 
 4. create a docker image with your app
+
+    docker build -t idhaunter/kyma_lab:3.12_00 .
+    docker run -it --rm -p 3000:3000 idhaunter/kyma_lab:3.12_00
+    docker ps -a
+    docker image ls
+    docker stop <container_id>
+    docker rmi <image_id>
+    docker push docker.io/idhaunter/kyma_lab:3.12_00
