@@ -146,3 +146,39 @@ spec:
     kubectl delete pod <pod-name>
     kubectl delete pod kyma-lab-697dcddd46-b7h9f
     kubectl get pods
+
+10. Provide resources (env variables) for deployment and pods within.
+    Create configmap.yaml file
+
+```
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: kyma-lab-config
+
+data:
+  PY_TEST_LOG_LEVEL: "DEBUG"
+```
+
+    kubectl apply -f configmap.yaml
+    kubectl describe configmap kyma-lab-config
+
+11. Connect ConfigMap to the deployment. Add to deployment.yaml
+
+```
+env:
+- name: PY_TEST_LOG_LEVEL
+  valueFrom:
+    configMapKeyRef:
+      name: kyma-lab-config
+      key: PY_TEST_LOG_LEVEL
+```
+
+    kubectl apply -f deployment.yaml     (apply changes)
+
+12. Check that variable exists in the pods
+
+    kubectl get pods
+    kubectl exec <pod-name> -- env | grep PY_TEST_LOG_LEVEL
+    kubectl exec kyma-lab-6d667f7d7c-qj775 -- env | grep PY_TEST_LOG_LEVEL

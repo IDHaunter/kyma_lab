@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: kyma-lab-config
+
+data:
+  PY_TEST_LOG_LEVEL: "DEBUG"

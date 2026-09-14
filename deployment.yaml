@@ -20,5 +20,13 @@ spec:
       containers:
         - name: kyma-lab
           image: idhaunter/kyma_lab:3.12_00
+
           ports:
             - containerPort: 3000
+
+          env:
+            - name: PY_TEST_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: kyma-lab-config
+                  key: PY_TEST_LOG_LEVEL
