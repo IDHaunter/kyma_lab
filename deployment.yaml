@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: kyma-lab
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: kyma-lab
+
+  template:
+    metadata:
+      labels:
+        app: kyma-lab
+
+    spec:
+      containers:
+        - name: kyma-lab
+          image: idhaunter/kyma_lab:3.12_00
+          ports:
+            - containerPort: 3000

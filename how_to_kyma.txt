@@ -15,9 +15,109 @@
 4. create a docker image with your app
 
     docker build -t idhaunter/kyma_lab:3.12_00 .
-    docker run -it --rm -p 3000:3000 idhaunter/kyma_lab:3.12_00
+    docker run -it --rm -e PY_TEST_LOG_LEVEL=DEBUG -p 3000:3000 idhaunter/kyma_lab:3.12_00
     docker ps -a
     docker image ls
     docker stop <container_id>
     docker rmi <image_id>
     docker push docker.io/idhaunter/kyma_lab:3.12_00
+
+5. create kubernetes deployment configuration in deployment.yaml
+
+```
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: kyma-lab
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: kyma-lab
+
+  template:
+    metadata:
+      labels:
+        app: kyma-lab
+
+    spec:
+      containers:
+        - name: kyma-lab
+          image: idhaunter/kyma_lab:3.12_00
+          ports:
+            - containerPort: 3000
+```
+
+6. Apply deployment configuration
+
+    kubectl apply -f deployment.yaml
+    kyma_lab % kubectl get deployments
+
+    Now we have a docker running in the pod.
+    But for now, there is one important thing: the application cannot yet be properly accessed from within Kubernetes from outside the Pod. To enable this, the next step is to create a Service.
+
+```
+Kubernetes cluster
+│
+└── Deployment: kyma-lab
+       │
+       └── ReplicaSet
+              │
+              └── Pod
+                    │
+                    └── Container
+                          │
+                          └── FastAPI :3000
+
+```
+
+7. Creating a service. Pod has dynamic IP, we need a service as stable point of access.
+
+    kubectl get pods                                    (here you can see a pod name)
+    kubectl describe pod kyma-lab-697dcddd46-lvmlw      (pod description)
+    kubectl logs kyma-lab-697dcddd46-lvmlw              (pod logs)
+
+    Create a file "service.yaml" in one directory with "deployment.yaml".
+    It says - traffic must go into pods with label "kyma-lab"
+
+```
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: kyma-lab
+
+spec:
+  selector:
+    app: kyma-lab
+
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+```
+
+    kubectl apply -f service.yaml
+    kubectl get services
+
+    kubectl port-forward service/kyma-lab 3000:3000  (in one terminal)
+    curl http://localhost:3000/                      (in another terminal)
+
+```
+curl
+ ↓
+localhost:3000
+ ↓
+kubectl port-forward
+ ↓
+Kubernetes Service
+ ↓
+Pod
+ ↓
+FastAPI
+```
+
+8. Setting 3 pods ()
