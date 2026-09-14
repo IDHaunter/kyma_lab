@@ -120,4 +120,29 @@ Pod
 FastAPI
 ```
 
-8. Setting 3 pods ()
+8. Setting 3 pods instead 1. In "deployment.yaml" set
+
+```
+spec:
+  replicas: 3
+```
+
+    kubectl apply -f deployment.yaml
+    kubectl get pods                           (now you can see 3 pods)
+
+```
+         Service
+        kyma-lab:3000
+             │
+     ┌───────┼───────┐
+     ↓       ↓       ↓
+   Pod 1   Pod 2   Pod 3
+     │       │       │
+   FastAPI FastAPI FastAPI
+```
+
+9. Kill one pod and see what will happen - kubernetes will create new automatically
+
+    kubectl delete pod <pod-name>
+    kubectl delete pod kyma-lab-697dcddd46-b7h9f
+    kubectl get pods

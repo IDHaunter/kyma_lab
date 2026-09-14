@@ -5,7 +5,7 @@ metadata:
   name: kyma-lab
 
 spec:
-  replicas: 1
+  replicas: 3
 
   selector:
     matchLabels:
