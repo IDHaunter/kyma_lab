@@ -182,3 +182,12 @@ env:
     kubectl get pods
     kubectl exec <pod-name> -- env | grep PY_TEST_LOG_LEVEL
     kubectl exec kyma-lab-6d667f7d7c-qj775 -- env | grep PY_TEST_LOG_LEVEL
+
+13. Change variable and restart deployment
+
+    PY_TEST_LOG_LEVEL: "INFO"
+    kubectl apply -f configmap.yaml
+    kubectl exec kyma-lab-6d667f7d7c-qj775 -- env | grep PY_TEST_LOG_LEVEL (here will be OLD value)
+    kubectl rollout restart deployment kyma-lab
+    kubectl exec kyma-lab-6d667f7d7c-qj775 -- env | grep PY_TEST_LOG_LEVEL (here will be NEW value)
+

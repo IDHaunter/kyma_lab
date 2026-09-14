@@ -5,4 +5,4 @@ metadata:
   name: kyma-lab-config
 
 data:
-  PY_TEST_LOG_LEVEL: "DEBUG"
+  PY_TEST_LOG_LEVEL: "INFO"
