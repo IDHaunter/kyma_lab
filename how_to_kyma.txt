@@ -191,3 +191,190 @@ env:
     kubectl rollout restart deployment kyma-lab
     kubectl exec kyma-lab-6d667f7d7c-qj775 -- env | grep PY_TEST_LOG_LEVEL (here will be NEW value)
 
+14. Install and create Helm base structure
+
+    helm version
+    brew install helm
+
+    mkdir kyma-lab-helm
+    cd kyma-lab-helm
+    helm create kyma-lab
+
+    rm -rf kyma-lab/templates/*      (remove templates to create manually only what we need)
+    touch kyma-lab/templates/deployment.yaml
+    touch kyma-lab/templates/service.yaml
+    touch kyma-lab/templates/configmap.yaml
+
+15. Modify values.yaml
+
+```
+replicaCount: 3
+
+image:
+  repository: idhaunter/kyma_lab
+  tag: "3.12_00"
+
+service:
+  port: 3000
+
+config:
+  logLevel: INFO
+```
+
+16. Modify configmap.yaml - here is the link to value config.logLevel from values.yaml
+
+```
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: {{ .Release.Name }}-config
+
+data:
+  PY_TEST_LOG_LEVEL: "{{ .Values.config.logLevel }}"
+```
+
+17. Generate kubernetes YAML just into console to check how values apply
+
+    helm template my-lab ./kyma-lab
+
+    here:
+
+    helm template      → Generate the Kubernetes YAML, but do NOT install it.
+    my-lab             → the name of future "Helm release"
+    ./kyma-lab         → where is Helm chart
+
+    result:
+
+```
+---
+# Source: kyma-lab/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: my-lab-config
+
+data:
+  PY_TEST_LOG_LEVEL: "INFO"
+```
+
+18. modify kyma-lab/templates/deployment.yaml and kyma-lab/templates/service.yaml to use values from values.yaml and chek:
+
+    helm template my-lab ./kyma-lab
+
+   result with all three files:
+
+```
+---
+# Source: kyma-lab/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: my-lab-config
+
+data:
+  PY_TEST_LOG_LEVEL: "INFO"
+---
+# Source: kyma-lab/templates/service.yaml
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: my-lab
+
+spec:
+  selector:
+    app: my-lab
+
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+---
+# Source: kyma-lab/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: my-lab
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: my-lab
+
+  template:
+    metadata:
+      labels:
+        app: my-lab
+
+    spec:
+      containers:
+        - name: kyma-lab
+
+          image: "idhaunter/kyma_lab:3.12_00"
+
+          ports:
+            - containerPort: 3000
+
+          env:
+            - name: PY_TEST_LOG_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: my-lab-config
+                  key: PY_TEST_LOG_LEVEL
+```
+
+19. Install using helm
+
+    helm install my-lab ./kyma-lab
+
+20. Check that pods are running
+
+    kubectl get pods
+
+21. Check deployments
+
+    kubectl get deployment
+
+22. Try to update. Set "replicaCount: 5" in  values.yaml adn run:
+
+    helm upgrade my-lab ./kyma-lab
+
+    kubectl get pods
+
+23. To check both locally we need to create port-forward
+
+    kubectl port-forward service/my-lab 3000:3000
+    kubectl port-forward service/kyma-lab 3001:3000
+
+XX. Schema of consuming hana and xsUAA
+
+```
+                     BTP
+                      │
+             ┌────────┴────────┐
+             │                 │
+           XSUAA            HANA Cloud
+             │                 │
+             │                 │
+             ▼                 ▼
+        APIRule/Gateway     ServiceBinding
+             │                 │
+             │                 ▼
+             │              Secret
+             │                 │
+             ▼                 ▼
+         FastAPI Pod ──────────┘
+```
+
+YY. Install Kyma CLI
+
+    kyma version  (if command not found then install)
+    https://kyma-project.io/external-content/cli/docs/user/README.html
+    curl -sL "https://raw.githubusercontent.com/kyma-project/cli/refs/heads/main/hack/install_cli_latest.sh" | sh -
+    kyma help
