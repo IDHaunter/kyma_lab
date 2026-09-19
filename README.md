@@ -14,6 +14,7 @@ Run fastAPI service
 ```
 debug: python3 -m app.app
 uvicorn app.app:app --host 0.0.0.0 --port 3000
+uvicorn app.app:app --host 0.0.0.0 --port 3000 --log-config uvicorn_logging.yaml
 ```
 
 ## Project Structure

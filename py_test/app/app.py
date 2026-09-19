@@ -3,10 +3,10 @@ import logging
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from app.settings import (APP_MODE, APP_MODE_LOCAL, APP_NAME, APP_VER, DEBUG, PORT, HOST, WORKERS)
-from app.routes.common.error_handlers import register_error_handlers
+from app.settings import (APP_MODE, APP_NAME, APP_VER, DEBUG, PORT, HOST, WORKERS)
+from app.routes.common.responses import SuccessResponse
 from app.routes.root import router as root_router
-from app.routes.common.responses import ResponseMessages
+from app.routes.hello import router as hello_router
 from app.middleware import check_authorization
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ logger.info(f"     version : {APP_VER['ver']}")
 logger.info(f"        date : {APP_VER['date']}")
 logger.info(f"        info : {APP_VER['info']}")
 
-if APP_MODE == APP_MODE_LOCAL:
+if APP_MODE == DEBUG:
     logger.info(f"Debug (local deployment): {DEBUG}")
     logger.info(f"Server port: {PORT}")
     logger.info(f"Server host: {HOST}")
@@ -37,19 +37,16 @@ app = FastAPI(
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
-# Register error handlers
-register_error_handlers(app)
-
 # Register routers
 app.include_router(root_router)
+app.include_router(hello_router)
 
 # Register Options (preflight) Handler
 @app.options("/{path:path}")
 async def options_handler(path: str):
-    return ResponseMessages.success(
-        "Preflight OK.",
-        data={},
-        status_code=200
+    return SuccessResponse(
+        message="Greetings",
+        data={}
     )
 
 # Register middleware
