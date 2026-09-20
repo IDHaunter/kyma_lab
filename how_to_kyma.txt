@@ -14,13 +14,13 @@
 
 4. create a docker image with your app
 
-    docker build -t idhaunter/kyma_lab:3.12_00 .
-    docker run -it --rm -e PY_TEST_LOG_LEVEL=DEBUG -p 3000:3000 idhaunter/kyma_lab:3.12_00
+    docker build -t idhaunter/kyma_lab:3.12_01 .
+    docker run -it --rm -e PY_TEST_LOG_LEVEL=DEBUG -p 3000:3000 idhaunter/kyma_lab:3.12_01
     docker ps -a
     docker image ls
     docker stop <container_id>
     docker rmi <image_id>
-    docker push docker.io/idhaunter/kyma_lab:3.12_00
+    docker push docker.io/idhaunter/kyma_lab:3.12_01
 
 5. create kubernetes deployment configuration in deployment.yaml
 
@@ -351,6 +351,109 @@ spec:
 
     kubectl port-forward service/my-lab 3000:3000
     kubectl port-forward service/kyma-lab 3001:3000
+
+24. Next step by step we will realize logs processing schema
+
+```
+                 Kubernetes
+                     │
+        ┌────────────┴────────────┐
+        │                         │
+     Pod #1                    Pod #2
+        │                         │
+        └────────────┬────────────┘
+                     │
+                  stdout
+                     │
+                     ▼
+              ┌─────────────┐
+              │    Alloy    │
+              │             │
+              │ collect     │
+              │ enrich      │
+              │ forward     │
+              └──────┬──────┘
+                     │
+                     ▼
+              ┌─────────────┐
+              │    Loki     │
+              │             │
+              │ store logs  │
+              └──────┬──────┘
+                     │
+                     ▼
+              ┌─────────────┐
+              │   Grafana   │
+              │             │
+              │ search      │
+              │ filtering   │
+              │ dashboards  │
+              └─────────────┘
+```
+
+25. Check logging
+
+    kubectl get pods
+    kubectl logs <pod>
+
+26. Install loki using helm
+
+    kubectl config current-context        - check current context (must be docker-desktop)
+    kubectl get nodes                     - get nodes
+    kubectl create namespace monitoring   - create namespace
+    kubectl get namespaces                - to see all namespaces
+
+    helm repo list                        - get helm repositories list
+
+    helm repo add grafana https://grafana.github.io/helm-charts       - add Grafana Helm repository
+    helm repo update                                                  - update to actual versions
+    helm repo list
+    helm search repo grafana/loki                                     - check Grafana loki
+
+    create directory "monitoring" and file "loki-values.yaml" inside of it
+
+    helm show values grafana/loki > loki-values-default.yaml   - check loki defaults
+    helm show chart grafana/loki                               - current chart version
+
+    helm install loki grafana/loki --namespace monitoring --values loki-values.yaml      - install loki
+
+    helm list -n monitoring    - checking, should be like this:
+
+    NAME    NAMESPACE       REVISION        UPDATED                                 STATUS          CHART           APP VERSION
+    loki    monitoring      1               2026-09-20 15:05:53.972373 +0200 CEST   deployed        loki-7.3.0      3.6.12
+
+    kubectl get pods -n monitoring      - check all pods created for loki
+    kubectl get all -n monitoring       - check all resources for loki
+
+    kubectl port-forward -n monitoring svc/loki 3100:3100      - in one terminal
+    curl http://localhost:3100/ready                           - in second terminal
+    curl http://localhost:3100/loki/api/v1/status/buildinfo
+    curl http://localhost:3100/metrics
+
+27. Now the schema is
+
+```
+     Kubernetes
+         │
+         │
+    ┌────▼────┐
+    │  Loki   │
+    └─────────┘
+```
+
+    but we need to add alloy
+
+```
+    kyma-lab pods
+         │
+         │ stdout
+         ▼
+       Alloy
+         │
+         │ push
+         ▼
+        Loki
+```
 
 ZZ. Schema of two environments - "local" and "btp kyma"
 

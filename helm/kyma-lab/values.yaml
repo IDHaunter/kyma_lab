@@ -1,8 +1,8 @@
-replicaCount: 0
+replicaCount: 3
 
 image:
   repository: idhaunter/kyma_lab
-  tag: "3.12_00"
+  tag: "3.12_01"
 
 service:
   port: 3000

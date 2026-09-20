@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: kyma-lab
-          image: idhaunter/kyma_lab:3.12_00
+          image: idhaunter/kyma_lab:3.12_01
 
           ports:
             - containerPort: 3000

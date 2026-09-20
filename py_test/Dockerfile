@@ -19,4 +19,4 @@ USER appuser
 EXPOSE 3000
 
 # workers=1
-CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["uvicorn", "app.app:app", "--host", "0.0.0.0", "--port", "3000", "--log-config", "uvicorn_logging.yaml"]
