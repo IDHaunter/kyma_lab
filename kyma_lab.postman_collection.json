@@ -1,0 +1,81 @@
+{
+  "info": {
+    "_postman_id": "195ee189-b88f-476d-a88e-7e722ca08a59",
+    "name": "kyma_lab",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "21684824",
+    "_collection_link": "https://go.postman.co/collection/21684824-195ee189-b88f-476d-a88e-7e722ca08a59?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "py_test",
+      "item": [
+        {
+          "name": "root",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "hello/say",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"user_name\": \"Bill\",\n    \"user_prefix\": \"1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/hello/say",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "hello",
+                "say"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "basic",
+    "basic": [
+      {
+        "key": "username",
+        "value": "admin",
+        "type": "string"
+      },
+      {
+        "key": "password",
+        "value": "admin",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    }
+  ]
+}
