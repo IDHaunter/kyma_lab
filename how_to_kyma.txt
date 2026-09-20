@@ -441,7 +441,7 @@ spec:
     └─────────┘
 ```
 
-    but we need to add alloy
+    where the loki is the storage, but we need to add log collector - alloy
 
 ```
     kyma-lab pods
@@ -454,6 +454,50 @@ spec:
          ▼
         Loki
 ```
+
+    helm install alloy grafana/alloy --namespace monitoring       - install alloy
+
+28. Now it is time to configure alloy.
+
+     touch alloy-values.yaml      in the monitoring folder
+
+```
+alloy:
+  configMap:
+    content: |
+      logging {
+        level  = "info"
+        format = "logfmt"
+      }
+
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+```
+
+    this configuration tells alloy - discovery.kubernetes "pods"
+
+29. Apply configuration:
+
+    helm upgrade alloy grafana/alloy --namespace monitoring --values alloy-values.yaml
+
+    kubectl get pods -n monitoring      - check
+
+    kubectl logs -n monitoring -l app.kubernetes.io/name=alloy
+
+30. Apply improved configuration
+
+    helm upgrade alloy grafana/alloy --namespace monitoring --values alloy-values.yaml
+
+    kubectl get pods -n monitoring      - check
+
+    kubectl logs -n monitoring -l app.kubernetes.io/name=alloy --tail=50
+
+31. Check logs
+
+    kubectl port-forward -n monitoring svc/loki 3100:3100                   - in one terminal
+
+    kubectl logs -n monitoring -l app.kubernetes.io/name=alloy --tail=200   - in second terminal
 
 ZZ. Schema of two environments - "local" and "btp kyma"
 
