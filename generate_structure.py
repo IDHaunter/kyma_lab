@@ -16,6 +16,7 @@ DEFAULT_EXCLUDED_DIRS = {
 }
 
 DEFAULT_EXCLUDED_FILES = {
+    "loki-values-default.yaml",
     "generate_structure.py",
     ".gitignore",
     "structure.md",

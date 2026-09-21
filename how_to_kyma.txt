@@ -493,11 +493,50 @@ alloy:
 
     kubectl logs -n monitoring -l app.kubernetes.io/name=alloy --tail=50
 
-31. Check logs
+31. Check logs in loki
 
     kubectl port-forward -n monitoring svc/loki 3100:3100                   - in one terminal
 
     kubectl logs -n monitoring -l app.kubernetes.io/name=alloy --tail=200   - in second terminal
+
+32. Install grafana into our cluster
+
+    helm repo add grafana https://grafana.github.io/helm-charts
+    helm repo update
+
+    helm install grafana grafana/grafana -n monitoring
+
+    kubectl get svc -n monitoring                                 - to see all services
+
+33. Get Grafana password from the command
+
+    kubectl get secret --namespace monitoring grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+    9cuBUYXXVIHPH8BLO7JVV2zvpdpxr4Dtpng7pN3H   - example
+
+33. Start Grafana
+
+    kubectl port-forward svc/grafana 3000:80 -n monitoring        - in one terminal
+
+    http://localhost:3000                                         - in the browser
+
+    user - admin
+    password - value from the step 33
+
+34. Connect loki to Grafana. Inside browser interface:
+
+    Connections -> Data sources -> Add data source -> chose Loki.
+
+    set:
+    [http://loki.monitoring.svc.cluster.local:3100]
+
+    press:
+    save&test
+
+    should appear:
+    Data source connected
+
+35. Get logs from grafana - go into "Explore", select label = 'loki' and press "Run query"
 
 ZZ. Schema of two environments - "local" and "btp kyma"
 
