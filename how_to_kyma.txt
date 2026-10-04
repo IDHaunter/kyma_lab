@@ -580,3 +580,5 @@ YY. Install Kyma CLI
     https://kyma-project.io/external-content/cli/docs/user/README.html
     curl -sL "https://raw.githubusercontent.com/kyma-project/cli/refs/heads/main/hack/install_cli_latest.sh" | sh -
     kyma help
+
+ZZ. If some

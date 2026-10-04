@@ -132,6 +132,7 @@ def read_file(path: Path) -> str:
 
 
 def generate_structure(root: Path) -> str:
+    """Generate Markdown content for a single directory."""
     excluded_dirs = DEFAULT_EXCLUDED_DIRS
     excluded_files = DEFAULT_EXCLUDED_FILES
 
@@ -149,11 +150,14 @@ def generate_structure(root: Path) -> str:
 
     sections = []
 
+    # Directory title
+    sections.append(f"# {root.name}\n\n")
+
     # ------------------------------------------------------------------
     # 1. Directory tree
     # ------------------------------------------------------------------
 
-    sections.append("# 1. Directory tree\n\n")
+    sections.append("## 1. Directory tree\n\n")
     sections.append("```text\n")
     sections.extend(line + "\n" for line in tree)
     sections.append("```\n\n")
@@ -162,12 +166,12 @@ def generate_structure(root: Path) -> str:
     # 2. File contents
     # ------------------------------------------------------------------
 
-    sections.append("# 2. Files and contents\n\n")
+    sections.append("## 2. Files and contents\n\n")
 
     for path in files:
         relative_path = path.relative_to(root)
 
-        sections.append(f"## `{relative_path}`\n\n")
+        sections.append(f"### `{relative_path}`\n\n")
 
         content = read_file(path)
 
@@ -186,33 +190,59 @@ def generate_structure(root: Path) -> str:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate a Markdown representation of a directory structure and file contents."
+        description=(
+            "Generate a Markdown representation of directory "
+            "structure and file contents."
+        )
     )
 
     parser.add_argument(
-        "directory",
-        nargs="?",
-        default=".",
-        help="Directory to process. Defaults to current directory.",
+        "directories",
+        nargs="*",
+        help=(
+            "Directories to process. "
+            "If omitted, the current directory is processed."
+        ),
     )
 
     args = parser.parse_args()
 
-    root = Path(args.directory).resolve()
+    # Directory from which the script was launched.
+    working_directory = Path.cwd()
 
-    if not root.is_dir():
-        raise SystemExit(f"Not a directory: {root}")
+    # No arguments -> process current directory.
+    directories = args.directories or ["."]
 
-    output_file = root / "structure.md"
+    sections = []
 
-    content = generate_structure(root)
+    for directory in directories:
+        root = Path(directory).resolve()
+
+        if not root.is_dir():
+            print(f"WARNING: Not a directory, skipping: {root}")
+            continue
+
+        print(f"Processing: {root}")
+
+        sections.append(
+            generate_structure(root)
+        )
+
+    if not sections:
+        raise SystemExit("No valid directories to process.")
+
+    # One common output file in the directory
+    # from which the script was launched.
+    output_file = working_directory / "structure.md"
+
+    content = "\n".join(sections)
 
     output_file.write_text(
         content,
         encoding="utf-8",
     )
 
-    print(f"Structure generated: {output_file}")
+    print(f"\nStructure generated: {output_file}")
 
 
 if __name__ == "__main__":
